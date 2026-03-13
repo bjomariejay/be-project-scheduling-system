@@ -85,7 +85,7 @@ const register = asyncHandler(async (req, res) => {
   const passwordHash = hashPassword(password);
   const userId = uuidv4();
   const client = await pool.connect();
-  let workspaceId = "";
+  let workspaceId;
   let workspaceDisplayName = normalizedWorkspaceName;
 
   try {

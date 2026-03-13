@@ -6,7 +6,7 @@ const parseList = (value = '') =>
 
 const port = Number(process.env.PORT) || 4000;
 const databaseUrl =
-  process.env.DATABASE_URL || 'postgres://postgres:123123@localhost:5432/project_ticket_management';
+  process.env.DATABASE_URL || 'postgres://postgres:123@localhost:5432/project_ticket_management';
 const dbSslEnabled = String(process.env.DB_SSL).toLowerCase() === 'true';
 const jwtSecret = process.env.JWT_SECRET || 'dev-secret';
 const tokenTtlSeconds = Number(process.env.JWT_TTL_SECONDS) || 8 * 60 * 60;

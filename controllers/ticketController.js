@@ -322,7 +322,6 @@ const updateTicketSettings = asyncHandler(async (req, res) => {
   const params = [];
   const changeMessages = [];
   let shouldLogActualHours = false;
-  let actualHoursTotal = null;
   const allowedStatuses = ['open', 'in_progress', 'archived'];
   const allowedPriorities = ['normal', 'priority'];
 
@@ -381,7 +380,6 @@ const updateTicketSettings = asyncHandler(async (req, res) => {
     const hoursMessage = `${actor.display_name} updated actual to ${totalHrs >= 0 ? totalHrs : 'unset'}`;
     changeMessages.push(hoursMessage);
     shouldLogActualHours = true;
-    actualHoursTotal = totalHrs >= 0 ? totalHrs : null;
   }
 
   if (!updates.length) {
@@ -530,6 +528,7 @@ const assignTicket = asyncHandler(async (req, res) => {
     res.json({ message: 'Assignee updated' });
   } catch (error) {
     await client.query('ROLLBACK');
+    console.error('Unable to assign ticket', error);
     res.status(500).json({ message: 'Unable to assign ticket' });
   } finally {
     client.release();

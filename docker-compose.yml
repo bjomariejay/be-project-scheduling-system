@@ -8,7 +8,9 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - db-data:/var/lib/postgresql/data
-      - ./db-init.sql:/docker-entrypoint-initdb.d/db-init.sql:ro
+      - ./db-migration/db-init.sql:/docker-entrypoint-initdb.d/00_db-init.sql:ro
+      - ./db-migration/V202603080001__create_ticket_work_logs.sql:/docker-entrypoint-initdb.d/01_create_ticket_work_logs.sql:ro
+      - ./db-migration/V202603081225__update_display_name_to_users.sql:/docker-entrypoint-initdb.d/02_update_display_name.sql:ro
     ports:
       - "5432:5432"
 

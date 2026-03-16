@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "migrate": "for %f in (db-migration\\*.sql) do psql postgres://postgres:123123@localhost:5432/project_ticket_management -f \"%f\"",
+    "migrate": "for %f in (db-migration\\*.sql) do psql postgresql://postgres:urGolsIFguQrvudYNwXhxXIHCAtEmABg@shuttle.proxy.rlwy.net:54793/railway -f \"%f\"",
     "lint": "eslint . --ext .js,.cjs,.mjs",
     "build": "npm run lint && node scripts/build.js"
   },

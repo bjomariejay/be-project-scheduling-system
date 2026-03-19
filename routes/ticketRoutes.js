@@ -3,6 +3,7 @@ const {
   archiveTicket,
   assignTicket,
   createTicket,
+  deleteTicket,
   getTicket,
   getTicketLogs,
   getTicketMessages,
@@ -28,5 +29,6 @@ router.post('/:ticketId/archive', archiveTicket);
 router.post('/:ticketId/messages', postTicketMessage);
 router.get('/:ticketId/messages', getTicketMessages);
 router.get('/:ticketId/logs', getTicketLogs);
+router.delete('/:ticketId', deleteTicket);
 
 module.exports = router;

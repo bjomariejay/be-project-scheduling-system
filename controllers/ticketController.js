@@ -814,10 +814,60 @@ const getTicketLogs = asyncHandler(async (req, res) => {
   res.json(rows);
 });
 
+const deleteTicket = asyncHandler(async (req, res) => {
+  const workspaceId = requireWorkspaceContext(req, res);
+  if (!workspaceId) return;
+  const { ticketId } = req.params;
+  const actorId = req.body?.actorId || req.user?.userId;
+  if (!actorId) {
+    return res.status(400).json({ message: 'actorId is required' });
+  }
+
+  const [ticket, actor] = await Promise.all([
+    getTicketForWorkspace(ticketId, workspaceId),
+    getUserById(actorId),
+  ]);
+  if (!ticket) {
+    return res.status(404).json({ message: 'Ticket not found' });
+  }
+  if (!actor || actor.workspace_id !== workspaceId) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+  const isMember = await ensureTicketMember(ticketId, actorId);
+  if (!isMember) {
+    return res.status(403).json({ message: 'Only ticket members can delete the ticket.' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('DELETE FROM ticket_work_logs WHERE ticket_number = $1', [
+      ticket.ticket_number,
+    ]);
+    const result = await client.query(
+      'DELETE FROM tickets WHERE id = $1 AND workspace_id = $2 RETURNING id',
+      [ticketId, workspaceId],
+    );
+    if (!result.rowCount) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Ticket not found' });
+    }
+    await client.query('COMMIT');
+    res.json({ message: 'Ticket deleted' });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Unable to delete ticket', error);
+    res.status(500).json({ message: 'Unable to delete ticket' });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = {
   archiveTicket,
   assignTicket,
   createTicket,
+  deleteTicket,
   getTicket,
   getTicketLogs,
   getTicketMessages,

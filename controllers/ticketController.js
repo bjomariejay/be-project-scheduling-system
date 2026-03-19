@@ -554,7 +554,7 @@ const assignTicket = asyncHandler(async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    await client.query('UPDATE tickets SET assignee_id = $1, updated_at = now() WHERE id = $2', [
+    await client.query('UPDATE tickets SET assignee_id = $1,  reviewer_id = null, updated_at = now() WHERE id = $2', [
       assigneeId,
       ticketId,
     ]);

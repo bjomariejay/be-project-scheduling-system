@@ -299,7 +299,17 @@ const updateTicketSettings = asyncHandler(async (req, res) => {
   const workspaceId = requireWorkspaceContext(req, res);
   if (!workspaceId) return;
   const { ticketId } = req.params;
-  const { actorId, status, priority, estimatedHours, title, actualHours } = req.body || {};
+  const {
+    actorId,
+    status,
+    priority,
+    estimatedHours,
+    title,
+    actualHours,
+    projectId,
+    privacy,
+    description,
+  } = req.body || {};
   if (!actorId) {
     return res.status(400).json({ message: 'actorId is required' });
   }
@@ -324,6 +334,7 @@ const updateTicketSettings = asyncHandler(async (req, res) => {
   let shouldLogActualHours = false;
   const allowedStatuses = ['open', 'in_progress', 'archived'];
   const allowedPriorities = ['normal', 'priority'];
+  const allowedPrivacy = ['public', 'private'];
 
   if (status && status !== ticket.status) {
     const normalizedStatus = String(status).toLowerCase();
@@ -380,6 +391,46 @@ const updateTicketSettings = asyncHandler(async (req, res) => {
     const hoursMessage = `${actor.display_name} updated actual to ${totalHrs >= 0 ? totalHrs : 'unset'}`;
     changeMessages.push(hoursMessage);
     shouldLogActualHours = true;
+  }
+
+  if (projectId && projectId !== ticket.project_id) {
+    const newProject = await getProjectById(projectId, workspaceId);
+    if (!newProject) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    updates.push(`project_id = $${updates.length + 1}`);
+    params.push(projectId);
+    changeMessages.push(`${actor.display_name} moved ticket to ${newProject.name}`);
+  }
+
+  if (privacy && privacy !== ticket.privacy) {
+    const normalizedPrivacy = String(privacy).toLowerCase();
+    if (!allowedPrivacy.includes(normalizedPrivacy)) {
+      return res.status(400).json({ message: 'Invalid privacy value' });
+    }
+    updates.push(`privacy = $${updates.length + 1}`);
+    params.push(normalizedPrivacy);
+    changeMessages.push(`${actor.display_name} set ticket privacy to ${normalizedPrivacy}`);
+  }
+
+  if (description !== undefined) {
+    let normalizedDescription = null;
+    if (typeof description === 'string') {
+      const trimmed = description.trim();
+      normalizedDescription = trimmed ? trimmed : null;
+    } else if (description === null) {
+      normalizedDescription = null;
+    }
+    const currentDescription = ticket.description || null;
+    if (normalizedDescription !== currentDescription) {
+      updates.push(`description = $${updates.length + 1}`);
+      params.push(normalizedDescription);
+      changeMessages.push(
+        normalizedDescription
+          ? `${actor.display_name} updated description`
+          : `${actor.display_name} cleared the description`
+      );
+    }
   }
 
   if (!updates.length) {
@@ -777,3 +828,4 @@ module.exports = {
   updateTicketPrivacy,
   updateTicketSettings,
 };
+

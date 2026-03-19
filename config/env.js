@@ -9,7 +9,7 @@ const port = Number(process.env.PORT) || 4000;
 // postgres://postgres:123@localhost:5432/project_ticket_management
 // postgresql://postgres:urGolsIFguQrvudYNwXhxXIHCAtEmABg@shuttle.proxy.rlwy.net:54793/railway
 const databaseUrl =
-  process.env.DATABASE_URL || 'postgres://postgres:123@localhost:5432/project_ticket_management';
+  process.env.DATABASE_URL || 'postgresql://postgres:urGolsIFguQrvudYNwXhxXIHCAtEmABg@shuttle.proxy.rlwy.net:54793/railway';
 const dbSslEnabled = String(process.env.DB_SSL).toLowerCase() === 'true';
 const jwtSecret = process.env.JWT_SECRET || 'dev-secret';
 const tokenTtlSeconds = Number(process.env.JWT_TTL_SECONDS) || 8 * 60 * 60;
